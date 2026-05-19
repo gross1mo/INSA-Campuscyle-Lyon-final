@@ -11,6 +11,8 @@ const s = {
   submitBtn: { background: '#000', color: '#fff', border: 'none', padding: '9px 20px', fontSize: 14, cursor: 'pointer' },
 };
 
+//
+
 export default function CreateListing() {
   const [form, setForm] = useState({ title: '', description: '', building: '' });
   const [imageFile, setImageFile] = useState(null);
