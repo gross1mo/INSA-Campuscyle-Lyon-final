@@ -21,7 +21,7 @@ export default function Marketplace() {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    db.items.list().then(setItems);
+    db.items.list().then(data => setItems(data || []));
   }, []);
 
   const deleteItem = async (id) => {
