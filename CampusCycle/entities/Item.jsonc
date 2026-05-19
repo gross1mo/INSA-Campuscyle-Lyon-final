@@ -1,0 +1,26 @@
+{
+  "name": "Item",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the item"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the item"
+    },
+    "building": {
+      "type": "string",
+      "description": "Where the item is located"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL of the item image"
+    }
+  },
+  "required": [
+    "title",
+    "building"
+  ]
+}
