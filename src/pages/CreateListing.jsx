@@ -11,8 +11,6 @@ const s = {
   submitBtn: { background: '#000', color: '#fff', border: 'none', padding: '9px 20px', fontSize: 14, cursor: 'pointer' },
 };
 
-//
-
 export default function CreateListing() {
   const [form, setForm] = useState({ title: '', description: '', building: '' });
   const [imageFile, setImageFile] = useState(null);
@@ -33,7 +31,7 @@ export default function CreateListing() {
 
     await db.items.create({ ...form, image_url });
     setLoading(false);
-    window.location.href = '/';
+    setTimeout(() => { window.location.href = '/'; }, 500);
   };
 
   return (
