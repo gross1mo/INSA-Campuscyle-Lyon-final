@@ -41,7 +41,7 @@ export default function CreateListing() {
 
     await db.items.create({ ...form, image_url });
     setLoading(false);
-    setTimeout(() => { window.location.href = '/'; }, 500);
+    setTimeout(() => { window.location.href = '/'; }, 5000);
   };
 
   return (

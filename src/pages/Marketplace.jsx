@@ -17,8 +17,10 @@ const s = {
   desc: { margin: '6px 0', fontSize: 14 },
   loc: { margin: '4px 0', fontSize: 13, color: '#555' },
   cat: { margin: '4px 0', fontSize: 12, color: '#888' },
-  actions: { marginTop: 10, display: 'flex', gap: 10 },
+  actions: { marginTop: 10, display: 'flex', gap: 10, alignItems: 'center' },
   contactLink: { fontSize: 13, color: '#000' },
+  // ← NEU: Stil für die angezeigte E-Mail-Adresse
+  emailText: { fontSize: 12, color: '#888', marginTop: 4 },
   deleteBtn: { fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', color: 'red', padding: 0 },
   empty: { color: '#888' },
 };
@@ -44,7 +46,6 @@ export default function Marketplace() {
     setItems(items.filter(i => i.id !== id));
   };
 
-  // Filtert die Artikel je nach aktivem Filter
   const filteredItems = items.filter(item => {
     if (activeFilter === 'All') return true;
     if (activeFilter === 'My Listings') return item.created_by === user?.email;
@@ -64,7 +65,6 @@ export default function Marketplace() {
         </div>
       </div>
 
-      {/* Filter-Buttons */}
       <div style={s.filters}>
         {CATEGORIES.map(cat => (
           <button
@@ -92,6 +92,10 @@ export default function Marketplace() {
               <button onClick={() => deleteItem(item.id)} style={s.deleteBtn}>Delete</button>
             }
           </div>
+          
+          {item.created_by && (
+            <p style={s.emailText}>✉️ {item.created_by}</p>
+          )}
         </div>
       ))}
     </div>
