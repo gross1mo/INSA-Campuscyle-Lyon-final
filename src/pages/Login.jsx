@@ -1,3 +1,8 @@
+// Login and sign up page (URL: /login).
+// Uses Supabase Auth — passwords are never stored by us directly.
+// After login: redirects to main page.
+// After sign up: Supabase sends a confirmation email first.
+
 import React, { useState } from 'react';
 import { supabase } from '@/api/client';
 
@@ -10,10 +15,12 @@ const s = {
 };
 
 export default function Login() {
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Sign in with existing account
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -23,6 +30,7 @@ export default function Login() {
     setLoading(false);
   };
 
+  // Create a new account — user gets a confirmation email
   const handleSignup = async () => {
     setLoading(true);
     const { error } = await supabase.auth.signUp({ email, password });

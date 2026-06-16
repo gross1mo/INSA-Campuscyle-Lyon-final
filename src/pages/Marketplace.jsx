@@ -1,8 +1,15 @@
+// Main page (URL: /).
+// Loads all listings on mount, handles category filtering,
+// and shows different UI depending on whether the user is logged in.
+
 import React, { useState, useEffect } from 'react';
 import { db, supabase } from '@/api/client';
 
+// To add or remove a category, update this array here
+// and also in the CATEGORIES array in CreateListing.jsx
 const CATEGORIES = ['All', 'Kitchen', 'Bathroom', 'Bedroom & Living Room', 'Furniture', 'Electronics', 'Study & Books', 'Plants', 'Clothing & Shoes', 'Other', 'My Listings'];
 
+// All styles in one place — easier to find and change
 const s = {
   page: { maxWidth: 600, margin: '0 auto', padding: '24px 16px', fontFamily: 'sans-serif' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
@@ -19,17 +26,18 @@ const s = {
   cat: { margin: '4px 0', fontSize: 12, color: '#888' },
   actions: { marginTop: 10, display: 'flex', gap: 10, alignItems: 'center' },
   contactLink: { fontSize: 13, color: '#000' },
-  // ← NEU: Stil für die angezeigte E-Mail-Adresse
   emailText: { fontSize: 12, color: '#888', marginTop: 4 },
   deleteBtn: { fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', color: 'red', padding: 0 },
   empty: { color: '#888' },
 };
 
 export default function Marketplace() {
-  const [items, setItems] = useState([]);
-  const [user, setUser] = useState(null);
+
+  const [items, setItems] = useState([]);            // all listings from DB
+  const [user, setUser] = useState(null);             // logged-in user, or null
   const [activeFilter, setActiveFilter] = useState('All');
 
+  // Runs once when page loads — fetches listings and checks who's logged in
   useEffect(() => {
     db.items.list().then(data => setItems(data || []));
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
@@ -40,12 +48,14 @@ export default function Marketplace() {
     window.location.href = '/login';
   };
 
+  // Asks for confirmation, deletes from DB, removes from list without page reload
   const deleteItem = async (id) => {
     if (!confirm('Delete this listing?')) return;
     await db.items.delete(id);
     setItems(items.filter(i => i.id !== id));
   };
 
+  // Filter logic — 'My Listings' matches by email, others match by category
   const filteredItems = items.filter(item => {
     if (activeFilter === 'All') return true;
     if (activeFilter === 'My Listings') return item.created_by === user?.email;
@@ -54,6 +64,8 @@ export default function Marketplace() {
 
   return (
     <div style={s.page}>
+
+      {/* Header */}
       <div style={s.header}>
         <h1 style={s.h1}>CampusCycle INSA Lyon</h1>
         <div style={{ display: 'flex', gap: 10 }}>
@@ -65,6 +77,7 @@ export default function Marketplace() {
         </div>
       </div>
 
+      {/* Category filter buttons */}
       <div style={s.filters}>
         {CATEGORIES.map(cat => (
           <button
@@ -79,6 +92,7 @@ export default function Marketplace() {
 
       {filteredItems.length === 0 && <p style={s.empty}>No listings yet.</p>}
 
+      {/* One card per listing */}
       {filteredItems.map(item => (
         <div key={item.id} style={s.card}>
           {item.image_url && <img src={item.image_url} alt={item.title} style={s.img} />}
@@ -87,12 +101,14 @@ export default function Marketplace() {
           {item.description && <p style={s.desc}>{item.description}</p>}
           <p style={s.loc}>📍 {item.building}</p>
           <div style={s.actions}>
+            {/* Opens the user's email client with subject pre-filled */}
             <a href={`mailto:${item.created_by}?subject=CampusCycle: ${item.title}`} style={s.contactLink}>Contact</a>
+            {/* Delete only visible to the person who posted it */}
             {user && item.created_by === user.email &&
               <button onClick={() => deleteItem(item.id)} style={s.deleteBtn}>Delete</button>
             }
           </div>
-          
+          {/* Email shown directly so it can be copied if mailto doesn't work */}
           {item.created_by && (
             <p style={s.emailText}>✉️ {item.created_by}</p>
           )}

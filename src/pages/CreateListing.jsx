@@ -1,6 +1,11 @@
+// Create listing page (URL: /new).
+// Redirects to /login if not logged in.
+// Handles optional image upload before saving to DB.
+
 import React, { useState, useEffect } from 'react';
 import { db, supabase } from '@/api/client';
 
+// Keep this in sync with the CATEGORIES array in Marketplace.jsx
 const CATEGORIES = ['Kitchen', 'Bathroom', 'Bedroom & Living Room', 'Furniture', 'Electronics', 'Study & Books', 'Plants', 'Clothing & Shoes', 'Other'];
 
 const s = {
@@ -14,17 +19,19 @@ const s = {
 };
 
 export default function CreateListing() {
+
   const [form, setForm] = useState({ title: '', description: '', building: '', category: '' });
   const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Wenn nicht eingeloggt → weiterleitung zu /login
+  // Redirect to login if not authenticated
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) window.location.href = '/login';
     });
   }, []);
 
+  // Updates a single field in the form state
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const handleSubmit = async (e) => {
@@ -33,12 +40,14 @@ export default function CreateListing() {
     if (!form.category) return alert('Please select a category.');
     setLoading(true);
 
+    // Upload image first if one was selected
     let image_url = '';
     if (imageFile) {
       const res = await db.items.uploadImage(imageFile);
       image_url = res.file_url;
     }
 
+    // Save to DB — created_by is added automatically in client.js
     await db.items.create({ ...form, image_url });
     setLoading(false);
     setTimeout(() => { window.location.href = '/'; }, 500);
@@ -48,20 +57,17 @@ export default function CreateListing() {
     <div style={s.page}>
       <a href="/" style={s.back}>← Back</a>
       <h1 style={s.h1}>New Listing</h1>
-
       <form onSubmit={handleSubmit}>
         <input style={s.input} placeholder="Title *" value={form.title} onChange={e => set('title', e.target.value)} />
         <textarea style={s.textarea} placeholder="Description (optional)" value={form.description} onChange={e => set('description', e.target.value)} />
         <input style={s.input} placeholder="Location / Residence *" value={form.building} onChange={e => set('building', e.target.value)} />
-
-        {/* Kategorie Dropdown */}
+        {/* Dropdown pulls from the CATEGORIES array above */}
         <select style={s.input} value={form.category} onChange={e => set('category', e.target.value)}>
           <option value="">Select category *</option>
           {CATEGORIES.map(cat => (
             <option key={cat} value={cat}>{cat}</option>
           ))}
         </select>
-
         <input style={s.fileInput} type="file" accept="image/*" onChange={e => setImageFile(e.target.files[0])} />
         <button type="submit" disabled={loading} style={s.submitBtn}>
           {loading ? 'Publishing...' : 'Publish'}
